@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Pet Feeder</title>
+</head>
+
+<body>
+
+<h1>Pet Feeder</h1>
+
+<hr>
+
+<!-- 摄像头 -->
+<h2>视频监控 & 云台控制</h2>
+
+<img src="/video_feed" width="320">
+
+<br><br>
+
+<button onclick="openCamera()">打开摄像头</button>
+<button onclick="closeCamera()">关闭摄像头</button>
+<button onclick="captureImage()">拍照</button>
+
+<br><br>
+
+<h3>云台方向</h3>
+
+<button onclick="move('up')">↑</button>
+
+<br>
+
+<button onclick="move('left')">←</button>
+
+<button onclick="move('right')">→</button>
+
+<br>
+
+<button onclick="move('down')">↓</button>
+
+<hr>
+
+<!-- 手动投喂 -->
+<h2>手动投喂</h2>
+
+<button onclick="feedNow()">立即投喂</button>
+
+<hr>
+
+<!-- 自动投喂 -->
+<h2>自动投喂</h2>
+
+<input type="time" id="feed_time">
+
+<button onclick="addTime()">
+添加定时
+</button>
+
+<button onclick="enableAuto()">
+开启自动投喂
+</button>
+
+<button onclick="disableAuto()">
+关闭自动投喂
+</button>
+
+<br><br>
+
+<h3>当前定时</h3>
+
+<ul id="schedule_list"></ul>
+
+<script>
+
+function openCamera() {
+
+    fetch('/open_camera', {
+        method:'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.status)
+    })
+}
+
+function closeCamera() {
+
+    fetch('/close_camera', {
+        method:'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.status)
+    })
+}
+
+function captureImage() {
+
+    fetch('/capture', {
+        method:'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.status)
+    })
+}
+
+function move(direction) {
+
+    fetch('/move/' + direction, {
+        method:'POST'
+    })
+}
+
+function feedNow() {
+
+    fetch('/feed', {
+        method:'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.status)
+    })
+}
+
+function enableAuto() {
+
+    fetch('/enable_auto', {
+        method:'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.status)
+    })
+}
+
+function disableAuto() {
+
+    fetch('/disable_auto', {
+        method:'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.status)
+    })
+}
+
+function addTime() {
+
+    const time =
+    document.getElementById("feed_time").value
+
+    fetch('/add_schedule', {
+
+        method:'POST',
+
+        headers:{
+            'Content-Type':'application/json'
+        },
+
+        body:JSON.stringify({
+            time:time
+        })
+
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        alert(data.status)
+
+        loadSchedules()
+    })
+}
+
+function removeTime(time) {
+
+    fetch('/remove_schedule', {
+
+        method:'POST',
+
+        headers:{
+            'Content-Type':'application/json'
+        },
+
+        body:JSON.stringify({
+            time:time
+        })
+
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        alert(data.status)
+
+        loadSchedules()
+    })
+}
+
+function loadSchedules() {
+
+    fetch('/get_schedules')
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        const list =
+        document.getElementById("schedule_list")
+
+        list.innerHTML = ""
+
+        data.schedules.forEach(item => {
+
+            const li =
+            document.createElement("li")
+
+            li.innerHTML =
+                item +
+                ' <button onclick="removeTime(\'' +
+                item +
+                '\')">删除</button>'
+
+            list.appendChild(li)
+        })
+    })
+}
+
+window.onload = loadSchedules
+
+</script>
+
+</body>
+
+</html>

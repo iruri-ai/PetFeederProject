@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>摄像头</title>
+</head>
+<body>
+    <h1>摄像头控制</h1>
+    <img id="video" src="/video_feed" width="320" height="240" style="border:1px solid #000;">
+    <br><br>
+    <button onclick="openCamera()">打开视频</button>
+    <button onclick="capture()">拍照</button>
+    <button onclick="closeCamera()">关闭视频</button>
+    <p id="status" style="font-size:16px;color:green;"></p>
+
+    <script>
+        function openCamera() {
+            fetch('/open_camera', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => document.getElementById('status').innerText = data.status);
+        }
+
+        function closeCamera() {
+            fetch('/close_camera', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => document.getElementById('status').innerText = data.status);
+        }
+
+        function capture() {
+            fetch('/capture', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => document.getElementById('status').innerText = data.status);
+        }
+    </script>
+</body>
+</html>

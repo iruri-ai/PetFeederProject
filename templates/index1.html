@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>智能宠物喂食器 | Pet Feeder Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e9f0f5 0%, #d9e2ec 100%);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 30px 20px;
+            color: #1e2f3e;
+        }
+
+        /* 主容器卡片风格 */
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            padding: 24px 28px 40px;
+            transition: all 0.2s ease;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2b6e4f, #1e4a76);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        hr {
+            margin: 18px 0 24px;
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, #bdd4db, #6c8d9e, #bdd4db);
+            border-radius: 4px;
+        }
+
+        h2 {
+            font-size: 1.55rem;
+            font-weight: 600;
+            color: #1f4e6e;
+            border-left: 5px solid #3b8c5a;
+            padding-left: 15px;
+            margin: 0 0 20px 0;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c5a6e;
+            margin: 20px 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 摄像头区域 */
+        .camera-section {
+            background: #f4f8fc;
+            border-radius: 32px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.8), 0 8px 18px rgba(0,0,0,0.05);
+        }
+
+        .video-wrapper {
+            background: #0a1c27;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.3);
+            margin-bottom: 18px;
+            text-align: center;
+            position: relative;
+        }
+
+        .video-wrapper img {
+            width: 100%;
+            display: block;
+            background: #132c3a;
+            transition: opacity 0.2s;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 16px 0 12px;
+            justify-content: center;
+        }
+
+        button {
+            background: #ffffffdd;
+            backdrop-filter: blur(4px);
+            border: none;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-family: inherit;
+            color: #1e3e54;
+            border: 1px solid #cbdde6;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        button:hover {
+            background: white;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            border-color: #8fb3c4;
+        }
+
+        .cam-btn {
+            background: #eef3f7;
+            font-weight: 500;
+        }
+
+        .cam-btn.primary {
+            background: #2c7a4d;
+            border-color: #1b5e3a;
+            color: white;
+            box-shadow: 0 4px 8px rgba(44,122,77,0.2);
+        }
+
+        .cam-btn.primary:hover {
+            background: #236b42;
+        }
+
+        /* 云台面板 */
+        .dpad {
+            background: #eef3f7;
+            border-radius: 60px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 20px;
+            margin-top: 6px;
+            box-shadow: inset 0 1px 3px #0001, 0 5px 10px rgba(0,0,0,0.05);
+        }
+
+        .dpad-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 5px 0;
+        }
+
+        .dpad-btn {
+            background: white;
+            width: 58px;
+            height: 58px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border-radius: 36px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 0 #b7c9d4;
+            transition: 0.05s linear;
+            border: 1px solid #d0e2ec;
+        }
+
+        .dpad-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #b7c9d4;
+        }
+
+        /* 手动投喂大按钮 */
+        .feed-now-btn {
+            background: linear-gradient(105deg, #f8a35e, #e57c2c);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 14px 28px;
+            width: 100%;
+            letter-spacing: 1px;
+            box-shadow: 0 12px 20px -8px rgba(229,124,44,0.4);
+            margin: 8px 0;
+        }
+
+        .feed-now-btn:hover {
+            background: linear-gradient(105deg, #ffb471, #f06a1a);
+            color: white;
+        }
+
+        /* 自动喂食区域 */
+        .auto-card {
+            background: #f1f5f9;
+            border-radius: 28px;
+            padding: 18px 22px;
+            margin: 20px 0 18px;
+        }
+
+        .time-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .time-input {
+            background: white;
+            border: 1px solid #cbdde6;
+            padding: 12px 18px;
+            border-radius: 44px;
+            font-size: 1.1rem;
+            font-family: monospace;
+            flex: 2;
+            min-width: 130px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .time-input:focus {
+            border-color: #3b8c5a;
+            box-shadow: 0 0 0 3px rgba(59,140,90,0.2);
+        }
+
+        .small-btn {
+            background: #e4edf2;
+            padding: 10px 20px;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 14px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            background: #dfe8ef;
+            font-weight: 600;
+        }
+
+        .toggle-btn.auto-on {
+            background: #3b8c5a;
+            color: white;
+            border-color: #2b6e45;
+        }
+
+        .toggle-btn.auto-off {
+            background: #9babb6;
+            color: white;
+            border-color: #7e929f;
+        }
+
+        /* 定时列表 */
+        .schedule-list {
+            background: white;
+            border-radius: 24px;
+            padding: 8px 16px;
+            list-style: none;
+            margin-top: 12px;
+            box-shadow: inset 0 0 0 1px #e2edf2, 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .schedule-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2edf2;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #1a3f50;
+        }
+
+        .schedule-list li:last-child {
+            border-bottom: none;
+        }
+
+        .del-btn {
+            background: #fde9e9;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 40px;
+            color: #c23d2b;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: 0.1s;
+        }
+
+        .del-btn:hover {
+            background: #ffd9d9;
+            color: #a12c1a;
+        }
+
+        /* 消息通知toast */
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #1e2f3ad9;
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.2);
+            letter-spacing: 0.3px;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 20px 18px;
+            }
+            .toast-msg {
+                white-space: normal;
+                text-align: center;
+                max-width: 85%;
+                font-size: 0.85rem;
+            }
+            .dpad-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🐾 Pet Feeder Pro</h1>
+    <hr>
+
+    <!-- 摄像头模块 -->
+    <div class="camera-section">
+        <h2>📸 视频监控 & 云台控制</h2>
+        <div class="video-wrapper">
+            <img id="videoFeed" src="/video_feed" alt="摄像头画面" width="100%">
+        </div>
+        <div class="btn-group">
+            <button class="cam-btn" id="openCamBtn">📹 打开摄像头</button>
+            <button class="cam-btn" id="closeCamBtn">🔒 关闭摄像头</button>
+            <button class="cam-btn primary" id="captureBtn">📷 拍照记录</button>
+        </div>
+
+        <h3>🎮 云台方向控制</h3>
+        <div style="display: flex; justify-content: center;">
+            <div class="dpad">
+                <div class="dpad-row">
+                    <button class="dpad-btn" data-dir="up">▲</button>
+                </div>
+                <div class="dpad-row">
+                    <button class="dpad-btn" data-dir="left">◀</button>
+                    <button class="dpad-btn" data-dir="right">▶</button>
+                </div>
+                <div class="dpad-row">
+                    <button class="dpad-btn" data-dir="down">▼</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 手动投喂 -->
+    <h2>🍖 手动投喂</h2>
+    <button id="feedNowBtn" class="feed-now-btn">⚡ 立即投喂一份</button>
+
+    <!-- 自动投喂 -->
+    <h2>⏰ 自动投喂计划</h2>
+    <div class="auto-card">
+        <div class="time-row">
+            <input type="time" id="feed_time" class="time-input" value="08:30">
+            <button id="addTimeBtn" class="small-btn">➕ 添加定时</button>
+        </div>
+        <div class="toggle-group">
+            <button id="enableAutoBtn" class="toggle-btn">🔛 开启自动投喂</button>
+            <button id="disableAutoBtn" class="toggle-btn">🔴 关闭自动投喂</button>
+        </div>
+        <h3 style="margin-top: 16px;">📋 当前定时列表</h3>
+        <ul id="schedule_list" class="schedule-list">
+            <li style="justify-content: center; color: #6f8fa0;">加载中...</li>
+        </ul>
+    </div>
+</div>
+
+<!-- 自定义toast提示 -->
+<div id="toastMsg" class="toast-msg"></div>
+
+<script>
+    // ---------- 非模态弹窗美化替代 ----------
+    function showMessage(msg, isError = false) {
+        const toast = document.getElementById('toastMsg');
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) scale(1)';
+        // 错误类稍微变一下底色
+        if (isError) {
+            toast.style.background = '#c23d2bdd';
+        } else {
+            toast.style.background = '#1e2f3ad9';
+        }
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) scale(0.9)';
+            setTimeout(() => {
+                if (!isError) toast.style.background = '#1e2f3ad9';
+            }, 200);
+        }, 2000);
+    }
+
+    // 辅助fetch json封装统一处理 toast消息
+    async function postJson(url, bodyData = null) {
+        const options = {
+            method: 'POST',
+            headers: bodyData ? { 'Content-Type': 'application/json' } : {}
+        };
+        if (bodyData) {
+            options.body = JSON.stringify(bodyData);
+        }
+        try {
+            const response = await fetch(url, options);
+            const data = await response.json();
+            if (data && data.status) {
+                showMessage(data.status);
+            } else {
+                showMessage(data.message || '操作已发送');
+            }
+            return data;
+        } catch (err) {
+            console.error('请求错误', err);
+            showMessage('网络错误, 请检查后端连接', true);
+            return null;
+        }
+    }
+
+    // 普通post无需显示额外json内容 (移动云台不期望消息，但保留无toast以免打扰)
+    async function postMove(direction) {
+        try {
+            await fetch('/move/' + direction, { method: 'POST' });
+            // 云台移动不弹toast（保持清爽，但为了符合逻辑不变，不打扰用户）
+            // 可选小提示？为了避免弹窗过多，移动不做主动提示。保持静默。
+        } catch (err) {
+            console.warn('move error', err);
+        }
+    }
+
+    // 加载定时列表
+    async function loadSchedules() {
+        try {
+            const res = await fetch('/get_schedules');
+            const data = await res.json();
+            const listEl = document.getElementById("schedule_list");
+            if (!listEl) return;
+            if (data.schedules && data.schedules.length) {
+                listEl.innerHTML = "";
+                data.schedules.forEach(item => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `
+                        <span>🕒 ${item}</span>
+                        <button class="del-btn" data-time="${item}">删除</button>
+                    `;
+                    listEl.appendChild(li);
+                });
+                // 绑定删除事件 (事件委托)
+                listEl.querySelectorAll('.del-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const timeVal = btn.getAttribute('data-time');
+                        if (timeVal) removeTime(timeVal);
+                    });
+                });
+            } else {
+                listEl.innerHTML = '<li style="justify-content:center; gap:8px;">📭 暂无定时，添加一个吧~</li>';
+            }
+        } catch (err) {
+            console.error('加载定时失败', err);
+            const listEl = document.getElementById("schedule_list");
+            if (listEl) listEl.innerHTML = '<li style="justify-content:center;">❌ 加载失败，刷新试试</li>';
+        }
+    }
+
+    // 删除定时
+    async function removeTime(timeStr) {
+        const data = await postJson('/remove_schedule', { time: timeStr });
+        if (data && data.status) {
+            await loadSchedules();  // 刷新列表
+        } else {
+            // 若失败但也尝试刷新
+            await loadSchedules();
+        }
+    }
+
+    // 添加定时
+    async function addTime() {
+        const timeInput = document.getElementById("feed_time");
+        const timeValue = timeInput.value;
+        if (!timeValue) {
+            showMessage('请选择有效时间', true);
+            return;
+        }
+        const data = await postJson('/add_schedule', { time: timeValue });
+        if (data && data.status) {
+            timeInput.value = "";  // 清空便于重新输入（可选习惯: 不清空但保留）
+            // 但是原逻辑没有清空，为了友好保留选中但可默认重置？不清空也行，但用户体验好一点也可不清。
+            // 由于原逻辑未清空，这里保持不清空但会刷新列表
+            await loadSchedules();
+        } else {
+            await loadSchedules();
+        }
+    }
+
+    // 打开摄像头
+    async function openCamera() {
+        const data = await postJson('/open_camera');
+        if (data && data.status) {
+            // 刷新图片源? 可尝试强制刷新video_feed缓存 (添加时间戳可选)
+            const videoImg = document.getElementById('videoFeed');
+            if (videoImg) {
+                videoImg.src = '/video_feed?_t=' + new Date().getTime();
+            }
+        }
+    }
+
+    // 关闭摄像头
+    async function closeCamera() {
+        await postJson('/close_camera');
+    }
+
+    // 拍照
+    async function captureImage() {
+        await postJson('/capture');
+    }
+
+    // 立即投喂
+    async function feedNow() {
+        await postJson('/feed');
+    }
+
+    // 开启自动投喂
+    async function enableAuto() {
+        await postJson('/enable_auto');
+    }
+
+    // 关闭自动投喂
+    async function disableAuto() {
+        await postJson('/disable_auto');
+    }
+
+    // 云台移动
+    function move(direction) {
+        postMove(direction);
+        // 可选轻提示: 为了不烦人，不加，但保留静默。
+        // 为了满足“不要再跳出弹窗确定”，所以移动完全不弹出。
+    }
+
+    // ---------- 事件绑定 & 初始化 ----------
+    function bindEvents() {
+        document.getElementById('openCamBtn')?.addEventListener('click', openCamera);
+        document.getElementById('closeCamBtn')?.addEventListener('click', closeCamera);
+        document.getElementById('captureBtn')?.addEventListener('click', captureImage);
+        document.getElementById('feedNowBtn')?.addEventListener('click', feedNow);
+        document.getElementById('enableAutoBtn')?.addEventListener('click', enableAuto);
+        document.getElementById('disableAutoBtn')?.addEventListener('click', disableAuto);
+        document.getElementById('addTimeBtn')?.addEventListener('click', addTime);
+        
+        // 云台方向按钮绑定（通过data-dir）
+        const dpadBtns = document.querySelectorAll('.dpad-btn');
+        dpadBtns.forEach(btn => {
+            const dir = btn.getAttribute('data-dir');
+            if (dir) {
+                btn.addEventListener('click', () => move(dir));
+            }
+        });
+        // 原生的 move 函数调用；另外为了防止旧html残留onclick未移除但我们会覆盖
+        // 保持和原来一致功能，但完全避免alert
+        // 此外，也可以通过移除原有内联onclick，但我们已经完全重建了监听，无干扰。
+    }
+
+    // 对于video_feed 监听加载错误等简单优雅提示（不弹alert，使用toast）
+    function setupVideoFeedListener() {
+        const videoImg = document.getElementById('videoFeed');
+        if (videoImg) {
+            videoImg.onerror = () => {
+                // 如果图片无法加载（摄像头未打开或者服务器未响应），仅用toast小提示不阻断
+                showMessage('📡 视频流加载失败，请确保摄像头已打开', true);
+            };
+            // 可周期性刷新图片? 但是保留原有逻辑不变，图片会每隔一段时间自动更新？取决于后端推流，不做额外干预。
+        }
+    }
+
+    // 初始化加载定时并绑定事件
+    window.onload = () => {
+        bindEvents();
+        loadSchedules();
+        setupVideoFeedListener();
+
+        // 额外监听输入框回车添加（可选便利）
+        const timeInput = document.getElementById('feed_time');
+        if (timeInput) {
+            timeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTime();
+                }
+            });
+        }
+
+        // 对于手动刷新列表，保证首次加载后用户手动添加删除都正常工作
+        // 某些删除按钮在loadSchedules中被动态注册，已委托无问题
+        // 并保留原有全局函数避免冲突，但原有function已经在上面重新声明，无影响
+
+        // 改善主题：视频模块第一次加载可提示用户主动点击打开摄像头。
+        // 不需要自动请求打开，保持与原来行为一致，但不再出现烦人alert确认
+    };
+
+    // 兼容如果页面还有任何遗留 onclick 属性我们已经完全取代，无弹窗！
+    // 并且为了确保所有调用没有 alert, 重写 window.alert? 没有必要，上面全量覆盖了。
+    // 确保安全性：原代码 captureImage 有alert，已被完美取代。
+</script>
+</body>
+</html>
