@@ -1,234 +1,698 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 
 <head>
-    <title>Pet Feeder</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>智能宠物喂食器 | 监控与管理系统</title>
+    <!-- 引入 ECharts 和 Font Awesome 图标库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f4f8 0%, #e2e8f0 100%);
+            font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            padding: 30px 24px;
+            color: #1e293b;
+        }
+
+        /* 主容器 */
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 标题区 */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 i {
+            background: none;
+            color: #3b82f6;
+            font-size: 2rem;
+        }
+
+        .sub {
+            color: #475569;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* 卡片网格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 28px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.02);
+            padding: 1.5rem 1.8rem;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 40px -14px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 5px solid #3b82f6;
+            padding-left: 16px;
+        }
+
+        .card-title i {
+            color: #3b82f6;
+            font-size: 1.4rem;
+        }
+
+        /* 视频区域 */
+        .video-box {
+            text-align: center;
+        }
+
+        .video-box img {
+            width: 100%;
+            max-width: 480px;
+            border-radius: 24px;
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.25);
+            border: 3px solid white;
+            background: #0f172a;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0 16px;
+            justify-content: center;
+        }
+
+        .ptz-panel {
+            background: #f8fafc;
+            border-radius: 32px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .ptz-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 8px 0;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            border: none;
+            background: #ffffff;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+            cursor: pointer;
+            font-family: inherit;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn i {
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: scale(1.02);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #b91c1c;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .btn-success {
+            background: #dcfce7;
+            border-color: #bbf7d0;
+            color: #15803d;
+        }
+
+        .ptz-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 40px;
+            font-size: 1.5rem;
+            background: white;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            transition: 0.1s linear;
+        }
+
+        .ptz-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* 列表 */
+        .schedule-list {
+            list-style: none;
+            margin-top: 12px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .schedule-list li {
+            background: #f1f5f9;
+            margin: 8px 0;
+            padding: 10px 14px;
+            border-radius: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .badge-time {
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        /* 重量区域 */
+        .weight-badge {
+            background: #0f172a;
+            color: #facc15;
+            font-size: 2rem;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 60px;
+            display: inline-block;
+            margin: 12px 0;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            background: #fff;
+            border-radius: 24px;
+            padding: 8px;
+        }
+
+        /* 记录区域 */
+        .records-wrapper {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .records-container {
+            max-height: 420px;
+            overflow-y: auto;
+            background: #ffffff;
+        }
+
+        .record-item {
+            padding: 14px 18px;
+            border-bottom: 1px solid #eef2ff;
+            transition: 0.1s;
+            font-size: 0.85rem;
+        }
+
+        .record-item.new {
+            background: #ecfdf5;
+            border-left: 5px solid #10b981;
+        }
+
+        .record-item:hover {
+            background: #f8fafc;
+        }
+
+        .stats-bar {
+            background: #eef2ff;
+            padding: 10px 18px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .end-message {
+            text-align: center;
+            padding: 12px;
+            color: #6c757d;
+            font-size: 0.75rem;
+            background: #f9f9ff;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        hr {
+            margin: 16px 0;
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
+        }
+
+        @media (max-width: 780px) {
+            body {
+                padding: 16px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 1.2rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-
-<h1>Pet Feeder</h1>
-
-<hr>
-
-<!-- 摄像头 -->
-<h2>视频监控 & 云台控制</h2>
-
-<img src="/video_feed" width="320">
-
-<br><br>
-
-<button onclick="openCamera()">打开摄像头</button>
-<button onclick="closeCamera()">关闭摄像头</button>
-<button onclick="captureImage()">拍照</button>
-
-<br><br>
-
-<h3>云台方向</h3>
-
-<button onclick="move('up')">↑</button>
-
-<br>
-
-<button onclick="move('left')">←</button>
-
-<button onclick="move('right')">→</button>
-
-<br>
-
-<button onclick="move('down')">↓</button>
-
-<hr>
-
-<!-- 手动投喂 -->
-<h2>手动投喂</h2>
-
-<button onclick="feedNow()">立即投喂</button>
-
-<hr>
-
-<!-- 自动投喂 -->
-<h2>自动投喂</h2>
-
-<input type="time" id="feed_time">
-
-<button onclick="addTime()">
-添加定时
-</button>
-
-<button onclick="enableAuto()">
-开启自动投喂
-</button>
-
-<button onclick="disableAuto()">
-关闭自动投喂
-</button>
-
-<br><br>
-
-<h3>当前定时</h3>
-
-<ul id="schedule_list"></ul>
-
-<script>
-
-function openCamera() {
-
-    fetch('/open_camera', {
-        method:'POST'
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.status)
-    })
-}
-
-function closeCamera() {
-
-    fetch('/close_camera', {
-        method:'POST'
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.status)
-    })
-}
-
-function captureImage() {
-
-    fetch('/capture', {
-        method:'POST'
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.status)
-    })
-}
-
-function move(direction) {
-
-    fetch('/move/' + direction, {
-        method:'POST'
-    })
-}
-
-function feedNow() {
-
-    fetch('/feed', {
-        method:'POST'
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.status)
-    })
-}
-
-function enableAuto() {
-
-    fetch('/enable_auto', {
-        method:'POST'
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.status)
-    })
-}
-
-function disableAuto() {
-
-    fetch('/disable_auto', {
-        method:'POST'
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.status)
-    })
-}
-
-function addTime() {
-
-    const time =
-    document.getElementById("feed_time").value
-
-    fetch('/add_schedule', {
-
-        method:'POST',
-
-        headers:{
-            'Content-Type':'application/json'
-        },
-
-        body:JSON.stringify({
-            time:time
-        })
-
-    })
-    .then(res => res.json())
-    .then(data => {
-
-        alert(data.status)
-
-        loadSchedules()
-    })
-}
-
-function removeTime(time) {
-
-    fetch('/remove_schedule', {
-
-        method:'POST',
-
-        headers:{
-            'Content-Type':'application/json'
-        },
-
-        body:JSON.stringify({
-            time:time
-        })
-
-    })
-    .then(res => res.json())
-    .then(data => {
-
-        alert(data.status)
-
-        loadSchedules()
-    })
-}
-
-function loadSchedules() {
-
-    fetch('/get_schedules')
-
-    .then(res => res.json())
-
-    .then(data => {
-
-        const list =
-        document.getElementById("schedule_list")
-
-        list.innerHTML = ""
-
-        data.schedules.forEach(item => {
-
-            const li =
-            document.createElement("li")
-
-            li.innerHTML =
-                item +
-                ' <button onclick="removeTime(\'' +
-                item +
-                '\')">删除</button>'
-
-            list.appendChild(li)
-        })
-    })
-}
-
-window.onload = loadSchedules
-
-</script>
-
+    <div class="dashboard">
+        <div class="header">
+            <h1><i class="fas fa-paw"></i> Pet Feeder · 智能管家</h1>
+            <div class="sub">实时监控 · 精准喂养 · 云台控制</div>
+        </div>
+
+        <div class="grid">
+            <!-- 左侧: 视频监控 + 云台 -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-video"></i> 视频监控 & 云台控制</div>
+                <div class="video-box">
+                    <img src="/video_feed" alt="Camera Feed" id="cameraFeed" style="width:100%; max-width:100%;">
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="openCamera()"><i class="fas fa-power-off"></i>
+                            打开摄像头</button>
+                        <button class="btn btn-secondary" onclick="closeCamera()"><i class="fas fa-ban"></i>
+                            关闭摄像头</button>
+                        <button class="btn btn-success" onclick="captureImage()"><i class="fas fa-camera"></i>
+                            拍照</button>
+                    </div>
+                    <div class="ptz-panel">
+                        <div class="ptz-row"><button class="btn ptz-btn" onclick="move('up')"><i
+                                    class="fas fa-arrow-up"></i></button></div>
+                        <div class="ptz-row">
+                            <button class="btn ptz-btn" onclick="move('left')"><i
+                                    class="fas fa-arrow-left"></i></button>
+                            <button class="btn ptz-btn" onclick="move('right')"><i
+                                    class="fas fa-arrow-right"></i></button>
+                        </div>
+                        <div class="ptz-row"><button class="btn ptz-btn" onclick="move('down')"><i
+                                    class="fas fa-arrow-down"></i></button></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧上部分: 手动投喂 + 自动定时 -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-bowl-food"></i> 投喂控制</div>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="feedNow()"><i class="fas fa-hand-peace"></i> 立即投喂</button>
+                    <div style="flex:1; min-width: 130px;">
+                        <div class="flex-between" style="margin-bottom: 8px;"><label><i class="far fa-clock"></i>
+                                定时时间</label></div>
+                        <input type="time" id="feed_time" class="btn"
+                            style="background:#f1f5f9; width:100%; padding:10px;">
+                    </div>
+                    <button class="btn btn-secondary" onclick="addTime()"><i class="fas fa-plus-circle"></i>
+                        添加定时</button>
+                </div>
+                <div class="btn-group" style="justify-content: space-between; margin: 8px 0;">
+                    <button class="btn btn-success" onclick="enableAuto()"><i class="fas fa-play"></i> 开启自动投喂</button>
+                    <button class="btn btn-danger" onclick="disableAuto()"><i class="fas fa-stop"></i> 关闭自动投喂</button>
+                </div>
+                <div style="margin-top: 18px;">
+                    <div><i class="fas fa-list-ul"></i> <strong>当前定时任务</strong></div>
+                    <ul id="schedule_list" class="schedule-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 重量监测 与 实时曲线 -->
+        <div class="card" style="margin-bottom: 28px;">
+            <div class="card-title"><i class="fas fa-weight-hanging"></i> 实时重量监测</div>
+            <div class="flex-between">
+                <div>
+                    <button class="btn btn-primary" onclick="start_weight_table()"><i class="fas fa-chart-line"></i>
+                        开启实时重量</button>
+                    <button class="btn btn-secondary" onclick="stop_weight_table()"><i class="fas fa-stop-circle"></i>
+                        关闭实时重量</button>
+                </div>
+                <div class="weight-badge"><span id="currentWeight">--</span> <span style="font-size:1rem;">g</span>
+                </div>
+            </div>
+            <div id="chart" style="width:100%; height:360px;" class="chart-container"></div>
+        </div>
+
+        <!-- 吃饭记录 + 每日统计双栏布局 -->
+        <div class="grid">
+            <div class="card" style="grid-column: span 1;">
+                <div class="card-title"><i class="fas fa-utensils"></i> 吃饭记录 · 实时动态</div>
+                <div class="stats-bar">
+                    <span><i class="fas fa-database"></i> 总记录数: <span id="totalCount">--</span></span>
+                    <span><i class="fas fa-sync-alt"></i> 最后更新: <span id="lastUpdate">--</span></span>
+                </div>
+                <div class="records-wrapper">
+                    <div id="recordsContainer" class="records-container">
+                        <div class="loading">🐾 加载记录中...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-column"></i> 每日吃饭量统计</div>
+                <div id="dailyChart" style="width:100%; height:380px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ======================== 原有功能完整保留 ========================
+        // 每日吃饭统计图表
+        var dailyChart = echarts.init(document.getElementById('dailyChart'));
+        dailyChart.setOption({
+            title: { text: '每日吃饭量趋势', left: 'center', top: 0, textStyle: { fontWeight: 'normal', fontSize: 14 } },
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            xAxis: { type: 'category', name: '日期', data: [], axisLabel: { rotate: 30 } },
+            yAxis: { type: 'value', name: '吃饭量(g)' },
+            series: [{ type: 'bar', name: '每日吃饭量(g)', data: [], itemStyle: { borderRadius: [8, 8, 0, 0], color: '#3b82f6' } }],
+            grid: { containLabel: true, top: 50, bottom: 20 }
+        });
+
+        function loadDailyConsumption() {
+            fetch('/api/daily_consumption')
+                .then(res => res.json())
+                .catch(() => [])
+                .then(data => {
+                    if (data && Array.isArray(data)) {
+                        var dates = data.map(item => item.date);
+                        var consumptions = data.map(item => item.total_consumption);
+                        dailyChart.setOption({
+                            xAxis: { data: dates },
+                            series: [{ data: consumptions }]
+                        });
+                    } else { console.log("无数据"); }
+                })
+                .catch(err => console.log('加载失败:', err));
+        }
+
+        // 重量图表逻辑 (实时)
+        var timestamps = [];
+        var weights = [];
+        var eventSource = null;
+        var chart = echarts.init(document.getElementById('chart'));
+        chart.setOption({
+            tooltip: { trigger: 'axis' },
+            xAxis: { type: 'category', name: '时间', data: timestamps },
+            yAxis: { type: 'value', name: '重量(g)' },
+            series: [{ type: 'line', data: weights, smooth: true, lineStyle: { color: '#f97316', width: 3 }, areaStyle: { opacity: 0.1 } }]
+        });
+        function updateChart(time, weight) {
+            timestamps.push(time);
+            weights.push(weight);
+            if (timestamps.length > 30) { timestamps.shift(); weights.shift(); }
+            chart.setOption({
+                xAxis: { data: timestamps },
+                series: [{ data: weights }]
+            });
+            document.getElementById('currentWeight').innerText = weight.toFixed(1);
+        }
+        function start_weight_table() {
+            if (eventSource) { eventSource.close(); }
+            eventSource = new EventSource('/start_weight_table');
+            eventSource.onmessage = function (event) {
+                var data = JSON.parse(event.data);
+                if (data.weight !== undefined) updateChart(data.time, data.weight);
+            };
+            eventSource.onerror = () => console.log('SSE 断开');
+        }
+        function stop_weight_table() {
+            if (eventSource) { eventSource.close(); eventSource = null; }
+            fetch('/stop_weight_table', { method: 'POST' }).catch(e => console.log);
+        }
+        function openCamera() { fetch('/open_camera', { method: 'POST' }).then(res => res.json()).then(data => alert(data.status)); }
+        function closeCamera() { fetch('/close_camera', { method: 'POST' }).then(res => res.json()).then(data => alert(data.status)); }
+        function captureImage() { fetch('/capture', { method: 'POST' }).then(res => res.json()).then(data => alert(data.status)); }
+        function move(direction) { fetch('/move/' + direction, { method: 'POST' }); }
+        function feedNow() { fetch('/feed', { method: 'POST' }).then(res => res.json()).then(data => alert(data.status)); }
+        function enableAuto() { fetch('/enable_auto', { method: 'POST' }).then(res => res.json()).then(data => alert(data.status)); }
+        function disableAuto() { fetch('/disable_auto', { method: 'POST' }).then(res => res.json()).then(data => alert(data.status)); }
+        function addTime() {
+            const time = document.getElementById("feed_time").value;
+            if (!time) { alert("请选择时间"); return; }
+            fetch('/add_schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ time: time })
+            }).then(res => res.json()).then(data => { alert(data.status); loadSchedules(); });
+        }
+        function removeTime(time) {
+            fetch('/remove_schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ time: time })
+            }).then(res => res.json()).then(data => { alert(data.status); loadSchedules(); });
+        }
+        function loadSchedules() {
+            fetch('/get_schedules').then(res => res.json()).then(data => {
+                const list = document.getElementById("schedule_list");
+                list.innerHTML = "";
+                if (data.schedules && data.schedules.length) {
+                    data.schedules.forEach(item => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `<span class="badge-time"><i class="far fa-bell"></i> ${item}</span> <button class="btn btn-danger" style="padding:6px 14px;" onclick="removeTime('${item}')"><i class="fas fa-trash-alt"></i> 删除</button>`;
+                        list.appendChild(li);
+                    });
+                } else { list.innerHTML = '<li style="justify-content:center;">暂无定时任务</li>'; }
+            });
+        }
+
+        // ======================== 吃饭记录高级功能 (保留完全逻辑，ui美化适配) ========================
+        let currentEnd = 0, currentBegin = 0, isLoadingFlag = false, hasMore = true;
+        let autoUpdateTimer = null;
+        let recordsList = [];
+        const container = document.getElementById('recordsContainer');
+        const totalCountSpan = document.getElementById('totalCount');
+        const lastUpdateSpan = document.getElementById('lastUpdate');
+
+        function formatTime(timeStr) {
+            if (!timeStr) return '未知';
+            const date = new Date(timeStr);
+            return date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+        function calculateConsumption(record) {
+            if (record.end_weight !== undefined && record.begin_weight !== undefined) return (record.end_weight - record.begin_weight).toFixed(1);
+            return record.amount || '0';
+        }
+        function renderRecord(record, isNew = false) {
+            const div = document.createElement('div');
+            div.className = 'record-item' + (isNew ? ' new' : '');
+            div.setAttribute('data-id', record.id);
+            const consumption = calculateConsumption(record);
+            div.innerHTML = `
+            <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between;">
+                <span><i class="far fa-calendar-alt"></i> <strong>开始:</strong> ${formatTime(record.begin_time)}</span>
+                <span><i class="far fa-clock"></i> <strong>结束:</strong> ${record.end_time ? formatTime(record.end_time) : '进行中'}</span>
+                <span><i class="fas fa-weight"></i> <strong>吃饭量:</strong> ${consumption}g</span>
+                <span><i class="fas fa-clipboard-list"></i> <strong>结果:</strong> ${record.result || '正常'}</span>
+            </div>
+            <div style="font-size:10px; color:#94a3b8; margin-top:8px;">📝 原始: ${record.begin_time}|${record.end_time || ''}|${record.result || ''}|${consumption}g</div>
+        `;
+            return div;
+        }
+        function updateStats() {
+            totalCountSpan.textContent = recordsList.length;
+            lastUpdateSpan.textContent = new Date().toLocaleTimeString();
+        }
+        function addRecords(records, position = 'end') {
+            const newRecords = [];
+            const existingIds = new Set(recordsList.map(r => r.id));
+            for (const rec of records) {
+                if (!existingIds.has(rec.id)) { newRecords.push(rec); existingIds.add(rec.id); }
+            }
+            if (newRecords.length === 0) return [];
+            if (position === 'start') recordsList = [...newRecords, ...recordsList];
+            else recordsList = [...recordsList, ...newRecords];
+            return newRecords;
+        }
+        function renderAllRecords() {
+            container.innerHTML = '';
+            if (recordsList.length === 0) { container.innerHTML = '<div class="loading" style="padding:30px;text-align:center;">🐕 暂无吃饭记录</div>'; return; }
+            for (const rec of recordsList) container.appendChild(renderRecord(rec, false));
+            const endDiv = document.createElement('div');
+            endDiv.className = 'end-message';
+            endDiv.innerHTML = hasMore ? '<i class="fas fa-arrow-up"></i> 向上滚动加载更多记录 <i class="fas fa-arrow-up"></i>' : '🏁 已加载全部历史记录';
+            container.appendChild(endDiv);
+            updateStats();
+        }
+        function prependNewRecords(records) {
+            if (records.length === 0) return;
+            const fragment = document.createDocumentFragment();
+            for (const rec of records.reverse()) fragment.appendChild(renderRecord(rec, true));
+            const firstChild = container.firstChild;
+            if (firstChild && container.children.length > 0) container.insertBefore(fragment, firstChild);
+            else container.appendChild(fragment);
+            updateStats();
+        }
+        function appendOldRecords(records) {
+            if (records.length === 0) return;
+            const endMsg = container.querySelector('.end-message');
+            if (endMsg) endMsg.remove();
+            const fragment = document.createDocumentFragment();
+            for (const rec of records) fragment.appendChild(renderRecord(rec, false));
+            container.appendChild(fragment);
+            const newEndMsg = document.createElement('div');
+            newEndMsg.className = 'end-message';
+            newEndMsg.innerHTML = hasMore ? '<i class="fas fa-arrow-up"></i> 向上滚动加载更多 <i class="fas fa-arrow-up"></i>' : '🏁 已加载全部记录';
+            container.appendChild(newEndMsg);
+            updateStats();
+        }
+        async function initLog() {
+            try {
+                const response = await fetch('/init_log');
+                const data = await response.json();
+                if (data.success) {
+                    recordsList = [];
+                    const newRecords = addRecords(data.head, 'end');
+                    if (newRecords.length > 0) {
+                        currentEnd = Math.max(...newRecords.map(r => r.id));
+                        currentBegin = Math.min(...newRecords.map(r => r.id));
+                        hasMore = (data.head.length === 5);
+                    } else { currentEnd = 0; currentBegin = 0; hasMore = false; }
+                    renderAllRecords();
+                } else throw new Error(data.error || '初始化失败');
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = `<div class="loading">❌ 加载失败: ${error.message}</div>`;
+            }
+        }
+        async function updateLog() {
+            if (isLoadingFlag) return;
+            try {
+                const params = new URLSearchParams({ current_end: currentEnd, current_begin: currentBegin });
+                const response = await fetch(`/update_log?${params}`);
+                const data = await response.json();
+                if (data.head && data.head.length) {
+                    const newRecs = addRecords(data.head, 'start');
+                    if (newRecs.length) { prependNewRecords(newRecs); currentEnd = Math.max(currentEnd, ...newRecs.map(r => r.id)); }
+                }
+                if (data.end && data.end.length) {
+                    const oldRecs = addRecords(data.end, 'end');
+                    if (oldRecs.length) {
+                        appendOldRecords(oldRecs);
+                        currentBegin = Math.min(currentBegin, ...oldRecs.map(r => r.id));
+                        hasMore = (data.end.length === 5);
+                    } else hasMore = false;
+                } else hasMore = false;
+                updateStats();
+            } catch (e) { console.error(e); }
+        }
+        async function loadOlderRecords() {
+            if (isLoadingFlag || !hasMore) return;
+            isLoadingFlag = true;
+            const endMsg = container.querySelector('.end-message');
+            if (endMsg) endMsg.innerHTML = '⏳ 加载中，请稍后...';
+            try {
+                const params = new URLSearchParams({ current_end: currentEnd, current_begin: currentBegin });
+                const response = await fetch(`/update_log?${params}`);
+                const data = await response.json();
+                if (data.end && data.end.length) {
+                    const oldRecs = addRecords(data.end, 'end');
+                    if (oldRecs.length) {
+                        appendOldRecords(oldRecs);
+                        currentBegin = Math.min(currentBegin, ...oldRecs.map(r => r.id));
+                        hasMore = (data.end.length === 5);
+                    } else hasMore = false;
+                } else hasMore = false;
+                updateStats();
+            } catch (e) { console.error(e); } finally {
+                isLoadingFlag = false;
+                const newEndMsg = container.querySelector('.end-message');
+                if (newEndMsg) newEndMsg.innerHTML = hasMore ? '<i class="fas fa-arrow-up"></i> 向上滚动加载更多记录 <i class="fas fa-arrow-up"></i>' : '🏁 已加载全部记录';
+            }
+        }
+        function setupScrollListener() {
+            container.addEventListener('scroll', () => {
+                const { scrollTop, scrollHeight, clientHeight } = container;
+                if (scrollHeight - scrollTop - clientHeight < 90) loadOlderRecords();
+            });
+        }
+        function startAutoUpdate() {
+            if (autoUpdateTimer) clearInterval(autoUpdateTimer);
+            autoUpdateTimer = setInterval(() => updateLog(), 5000);
+        }
+        window.addEventListener('beforeunload', () => { if (autoUpdateTimer) clearInterval(autoUpdateTimer); });
+        setTimeout(setupScrollListener, 300);
+        startAutoUpdate();
+
+        // 启动所有数据
+        window.onload = () => {
+            loadSchedules();
+            loadDailyConsumption();
+            initLog();
+        };
+    </script>
 </body>
 
 </html>

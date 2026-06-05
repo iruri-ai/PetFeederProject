@@ -17,13 +17,13 @@ feed_servo = Servo(
 
 def feed():
     print("开始投喂")
-    
+    unset_enable_hx711()
     # 转45°（无抖动）
     feed_servo.value = 0.5
     sleep(DEFAULT_FEED_DURATION)
     
     # 回位
     feed_servo.value = 0
-    sleep(0.1)
-    
+    sleep(1)
+    set_enable_hx711()
     print("投喂完成")

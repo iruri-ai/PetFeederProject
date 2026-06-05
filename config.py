@@ -51,3 +51,12 @@ DEFAULT_FEED_DURATION = 0.5  # 出粮持续时间，单位秒
 # =========================
 
 AUTO_FEED_DEFAULT = False
+MODEL_PATH = "mobilenet_v1_1.0_224_quant.tflite"
+LABEL_PATH = "labels_mobilenet_quant_v1_224.txt"
+enable_hx711=False
+def set_enable_hx711():
+    global enable_hx711
+    enable_hx711 = True
+def unset_enable_hx711():
+    global enable_hx711
+    enable_hx711 = False

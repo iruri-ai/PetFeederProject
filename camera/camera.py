@@ -6,6 +6,7 @@ import time
 import os
 
 from config import *
+from .servo_control import servo_horizontal, servo_vertical
 
 # 全局变量
 
@@ -96,12 +97,17 @@ def close_camera():
     time.sleep(0.1)
 
     if cap is not None:
-
         cap.release()
 
-    print("摄像头已关闭")
+    # ======================
+    # 【关闭摄像头 → 云台自动归位】
+    # ======================
+    servo_horizontal.value = 0.0
+    servo_vertical.value = 0.0
+    time.sleep(0.2)
 
-    return "摄像头已关闭"
+    print("摄像头已关闭 | 云台已归位")
+    return "摄像头已关闭 | 云台已归位"
 
 # 拍照
 
@@ -172,3 +178,25 @@ def video_feed():
         gen_frames(),
         mimetype='multipart/x-mixed-replace; boundary=frame'
     )
+
+# 专为AI识别批量拍照
+def capture_for_recognize(count=4):
+    global frame, camera_on, cap
+
+    if not camera_on or cap is None or not cap.isOpened():
+        return []
+
+    image_paths = []
+
+    while len(image_paths) < count:
+        with lock:
+            if frame is not None:
+                filename = os.path.join(
+                    save_folder,
+                    f"rec_{int(time.time())}_{len(image_paths)}.jpg"
+                )
+                cv2.imwrite(filename, frame)
+                image_paths.append(filename)
+        time.sleep(0.2)
+
+    return image_paths
