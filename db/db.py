@@ -64,10 +64,7 @@ class maoDB:
             # 插入几条示例数据（可选）
             cursor.execute("""
                 INSERT INTO feeding_schedule (feed_time, enabled) VALUES 
-                ('08:00', 1),
-                ('12:00', 1),
-                ('18:00', 1),
-                ('22:00', 1)
+                ('08:00', 1)
             """)
             print("[DB] 插入示例投喂时间")
         

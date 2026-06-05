@@ -37,7 +37,7 @@ class Hx711:
                  reference_unit: float = 413,
                  sample_delay: float = 1.0,
                  sampe_times: int = 2,
-                 tare_offset: int = -141454,
+                 tare_offset: int = -137503.9,
                  garmmar: int = 2,
                  expect_times: int = 2,
                  ordinary_times: int = 3,
