@@ -554,7 +554,7 @@
             <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between;">
                 <span><i class="far fa-calendar-alt"></i> <strong>开始:</strong> ${formatTime(record.begin_time)}</span>
                 <span><i class="far fa-clock"></i> <strong>结束:</strong> ${record.end_time ? formatTime(record.end_time) : '进行中'}</span>
-                <span><i class="fas fa-weight"></i> <strong>吃饭量:</strong> ${consumption}g</span>
+                <span><i class="fas fa-weight"></i> <strong>吃饭量:</strong> ${-consumption}g</span>
                 <span><i class="fas fa-clipboard-list"></i> <strong>结果:</strong> ${record.result || '正常'}</span>
             </div>
             <div style="font-size:10px; color:#94a3b8; margin-top:8px;">📝 原始: ${record.begin_time}|${record.end_time || ''}|${record.result || ''}|${consumption}g</div>

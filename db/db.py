@@ -154,7 +154,7 @@ class maoDB:
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT * FROM eating_records 
+            SELECT * FROM eating_records
             ORDER BY begin_time DESC 
             LIMIT ? OFFSET ?
         """, (limit, offset))

@@ -61,7 +61,8 @@ class Hx711:
         self.ordinary_happen_times = 0
         self.measure_interval = measure_interval
         self.log_enabled = True
-        self._is_in_anomaly = False 
+        self._is_in_anomaly = False
+        self._last_normal_weight = 0.0 
 
         # 状态变量
         self.gpio_initialized = False  
@@ -207,13 +208,16 @@ class Hx711:
     def _detect_anomaly(self, change, new_weight):
         if change > self.garmmar:
             # 出现异常变化
+            if self.expect_happen_times == 0:
+                # 首次异常，保存当前重量为异常前最后一次正常重量
+                self._last_normal_weight = self.weight
             self.expect_happen_times += 1
             self.ordinary_happen_times = 0
             
             if self.expect_happen_times >= self.expect_times and not self._is_in_anomaly:
                 self._is_in_anomaly = True
                 self.begin_t = datetime.now()
-                self.begin_w = new_weight
+                self.begin_w = self._last_normal_weight
                 self._expect_process_start()
         else:
             # 正常变化（没有异常）
@@ -231,6 +235,7 @@ class Hx711:
                 # 不在异常状态，重置所有计数
                 self.expect_happen_times = 0
                 self.ordinary_happen_times = 0
+                self._last_normal_weight = new_weight
 
     def _expect_process_end(self):
         """异常结束回调"""
